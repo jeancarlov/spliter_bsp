@@ -289,6 +289,58 @@ def mars_facts():
     # Convert dataframe into HTML format, add bootstrap
     return df.to_html(classes="table table-striped")
 
+def hemispheres(browser):
+    # Visit URL
+    url = 'https://marshemispheres.com/'
+    browser.visit(url + 'index.html')
+    
+    hemisphere_image_urls = []
+
+    for i in range(4):
+
+        # Find the elements on each loop to avoid a stale element exception
+
+        browser.find_by_css("a.product-item img")[i].click()
+
+        hemi_data = scrape_hemisphere(browser.html)
+
+        hemi_data['img_url'] = url + hemi_data['img_url']
+
+        # Append hemisphere object to list
+
+        hemisphere_image_urls.append(hemi_data)
+
+        # Finally, we navigate backwards
+
+        browser.back()
+
+
+
+    return hemisphere_image_urls
+
+def scrape_hemisphere(html_text):
+    
+    text_soup = soup(html_text, 'html.parser')
+    
+    try:
+        title_elem = text_soup.find('h2', class_='title').get_text()
+        sample_elem = text_soup.find('a', text='Sample').get('href')
+    
+    except AttributeError:
+        
+        title_elem = None
+        sample_elem = None
+    
+    hemispheres = {
+        
+        'title': title_elem,
+        'img_url': sample_elem
+    }
+    
+    return hemispheres
+
+
+
 if __name__ == "__main__":
 
     # If running as script, print scraped data
